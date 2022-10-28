@@ -1,8 +1,5 @@
 - [首页](/README.md)
-- Golang
-    - 原理
-        - [Goroutine及调度](/Golang/%E5%8E%9F%E7%90%86/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%9C%89%20Goroutine%20%E5%8F%8A%E6%80%8E%E4%B9%88%E8%B0%83%E5%BA%A6.md)
-    - 常见用法错误
-        - [for range](/Golang/%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF/Golang%E7%BB%8F%E5%85%B8%E2%80%9C%E5%9D%91%E2%80%9D%E4%B9%8Bfor%20range.md)
-    - 改造
-        - [GoProxy](/Golang/%E6%94%B9%E9%80%A0/Golang%20Modules%E4%BB%A3%E7%90%86goproxy.io%E6%BA%90%E7%A0%81%E7%AE%80%E6%9E%90%E5%8F%8A%E6%94%B9%E9%80%A0.md)
+- Golang相关
+    - [Goroutine及调度](/Golang/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%9C%89%20Goroutine%20%E5%8F%8A%E6%80%8E%E4%B9%88%E8%B0%83%E5%BA%A6.md)
+    - [for range](/Golang/Golang%E7%BB%8F%E5%85%B8%E2%80%9C%E5%9D%91%E2%80%9D%E4%B9%8Bfor%20range.md)
+    - [GoProxy](/Golang/Golang%20Modules%E4%BB%A3%E7%90%86goproxy.io%E6%BA%90%E7%A0%81%E7%AE%80%E6%9E%90%E5%8F%8A%E6%94%B9%E9%80%A0.md)

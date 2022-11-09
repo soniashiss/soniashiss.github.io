@@ -5,14 +5,17 @@
 ### 基本数据结构
 
 **1.SDS**
+
 由于 redis 是 C 写的，没有其余现代语言的 string 类型，因此自己实现了一个类似的。
 底层是个数组，可以自动扩容
 
 **2.list**
+
 双向链表带了统计 len 的字段，还带了三个函数指针用于复制、释放以及比较节点的 value（用于支持多种 value 类型）。
 ![](http://redisbook.com/_images/graphviz-5f4d8b6177061ac52d0ae05ef357fceb52e9cb90.png)
 
 **3.intset**
+
 整数集合，底层是数组，可以保存 int16_t、int32_t、int64_t三种情况的整数，通过 encoding 来标识。
 ![](http://redisbook.com/_images/graphviz-acf7fe010d7b09c5d2500c72eb555863e67ad74f.png)
 
@@ -39,7 +42,7 @@ typedef struct redisObject {
 
 } robj;
 ```
-其中 type 就是指"string", "list", "hash"一类我们成为 redis 基本数据类型的内容；encoding 指 ziplist/dict 之类的后端实际实现。
+其中 type 就是指"string", "list", "hash"一类我们称为 redis 基本数据类型的内容；encoding 指 ziplist/dict 之类的后端实际实现。
 
 | Redis数据类型 | 后端实现 | 常见命令 |
 | -- | -- | -- |
@@ -70,11 +73,23 @@ redisDb 中的 expires字段(还是一个 dict), 存储某个 key 的过期时�
 5. AOF 持久化时，是否有记录只跟这个 key 是不是真的被执行删除有关；重写时会检查是否过期，已过期不写入
 
 ### 持久化
-**4. RDB持久化**
+**4. RDB 持久化**
 
 1. 分 save 和 bgsave 两种方式，save 阻塞主进程（此时拒绝服务），bgsave fork 主进程来持久化，不阻塞主进程
 2. 不能同时存在两个持久化进程，包括 RDB 和 AOF
-3. bgsave 可以做到后台自动保存，保存条件存储在 redisServer 的 saveparam 数组中，server 100ms 轮询一次检查是否满足保存条件
+3. bgsave 可以做到后台自动保存，保存条件存储在 redisServer 的 saveparam 数组中，server 默认100ms 轮询一次检查是否满足保存条件（配套 dirty 计数和 lastsave 属性）
+4.RDB 文件大结构如下所示，“REDIS”是个常量，用于表示这是个 RDB 文件； db_version 4 byte, 标识 RDB 文件版本号；databases中包含 DB 的具体内容；EOF 是结束符；check_sum 用于校验文件是否有损坏
+
+| REDIS | db_version | databases | EOF | check_sum |
+| -- | -- | -- | -- | -- |
+
+**5. AOF 持久化**
+1. 写原理：redis 每执行一条**写**命令，都将命令存入 AOF 缓冲区，并根据配置在每一个执行周期内来决定是否将 AOF 缓冲区内的内容刷进 AOF 文件里并进行同步
+2. 恢复原理：创建一个不带网络连接的伪客户端，根据 AOF 文件将所有命令执行一遍
+3. AOF rewrite 原理：根据服务器当前内存状态，将数据用一条命令代替之前的 N 条，相当于只写终态的命令。好处是可以减小 AOF 文件大小。
+    * 有阻塞和非阻塞两种；阻塞情况服务器不响应客户端请求，非阻塞情况通过 fork 主进程的子进程来执行 AOF rewrite
+    * 非阻塞的情况下：1）子进程有主进程的内存备份，可以写；2）子进程执行期间主进程执行的写命令会被写入 AOF 缓冲区和 AOF rewrite 缓冲区，子进程 rewrite 完毕结束前，会将 AOF rewrite 缓冲区内的内容 append 进文件，然后替换原来的 AOF 文件。
+
 
 ## 主要参考资料
 1. 《Redis 设计与实现》, 黄健宏, 机械工业出版社, 2014-06-01

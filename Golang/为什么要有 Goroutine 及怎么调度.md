@@ -1,8 +1,7 @@
 # Goroutine及其调度学习总结
 
-以下是个人对Goroutine的总结
 
-**此文章写于2019年，当时的 Go 还没有抢占式调度 Goroutine，此文暂时还没增加相关内容**
+**Created in 2019，updated in 2022**
 
 ## 1.是什么
 
@@ -139,8 +138,16 @@ Go 1.0时，gorutine的调度为G-M模型，即Machine直接关联管理G。具�
 
 ![goroutine调度](https://colobu.com/2017/05/04/go-scheduler/go-sched.png)
 
+### 3.2.3 抢占式调度
+上述GMP模型有一个缺点：如果某个goroutine死循环了，那么那个M就一直在跑死循环的goroutine了，没有办法被别的goroutine使用。
+为此，Go加入了抢占式调度，主要在两个时间地方可以检测：
+1）某段function 进入之前，Go的编译器会自动插入一小段代码检测是否需要抢占（tbc，什么版本，为什么，什么原理，适用场景）
+2）内存回收时（tbc）
+
 # 4.总结
 
 * Goroutine是Golang Runtime管理的、轻量级的线程，是Golang程序调度执行的最小单元。
 * Golang使用Runtinme和Goroutine是为了降低CPU切换线程开销，提升并发性能；同时带来的一个好处是降低使用编程语言来进行并发编程时对于多进程/线程/操作系统等参数的设置经验要求（当然，也简化了编程操作）。
 * 当前主流版本Golang均采用M-P-G调度模型，其中M为真正执行CPU指令的worker thread，P为逻辑上的Processor，G为Goroutine执行上下文。
+
+#CS/Go 

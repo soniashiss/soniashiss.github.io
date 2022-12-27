@@ -432,3 +432,5 @@ B -->|其余域名| D[proxy2, 解决 GFW 问题]
 此部分内容个人暂时未想到特别好的办法，只能先参考 https://golang.org/doc/faq#git_https 使用.netrc文件来处理。
 
 若有更好的方法欢迎讨论~
+
+#CS/Go 

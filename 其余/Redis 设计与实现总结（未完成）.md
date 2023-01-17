@@ -53,7 +53,7 @@ typedef struct redisObject {
 | set | intset/dict | SCARD/SMEMBERS/SISMEMBER |
 | sorted_set | ziplist/skiplist | ZCARD/ZRANGE |
 
-## 数据库实现
+## 单机数据库实现
 
 此部分写在前面的个人见解：可以很明显看到实现上大体分为两层：1）基础数据结构 2）基础数据结构之上的分模块功能。两者相互影响。
 
@@ -169,6 +169,42 @@ time_t lastinteraction; //last interaction time with server
 time_t obuf_soft_limit_reached_time; //防止 client 的输出缓冲区过大占用过多资源，服务端会检查缓冲区大小，分硬性和软性限制。超过硬性限制直接关闭，超过软性限制则记录超过的起始时间（也就是本字段），如果持续超过则关闭。
 }
 ```
+
+### 服务器
+
+#### 1.命令处理过程
+简单来说：
+1）读取 redisClient 缓冲区内的命令（见[客户端](#客户端)部分）
+2）解析，比如将用户发送的命令解析指向 RedisCommand 表 （此表可以理解成各种命令的实现函数的表，是个 dict）
+3）前置检查，比如身份验证，内存回收检查服务器是否处于可以响应的状态等等等
+4）执行，将执行结果保存到 redisClient 的输出缓冲区
+5）后置操作，如记录 log，AOF 持久化操作，被复制时将命令传播给其他服务器等。
+
+#### 2. serverCron
+
+serverCron 默认 100ms 执行一次
+干的事情：
+1）更新 redisServer 的时间缓存（精度不高的缓存，100 ms 一次，只在执行非高精度操作时使用）
+2）更新 LRU 时钟(lruclock字段，10s 一次)，用于和 redisObj 的空转时间记录比较后得出空转时间
+3）各种统计数据的更新，如服务器每秒执行多少次命令、内存峰值等
+4）处理 sigterm 信号
+5）管理客户端资源（比如释放掉连接超时的客户端）
+6）管理数据库资源（比如删除过期键，对 dict 进行收缩等操作）
+7）关闭输出缓冲区超限的客户端
+8）执行被延迟的 BGREWRITEAOF 命令
+9）检查持久化操作的运行状态
+10）将 AOF 缓冲区的内容写入 AOF 文件
+11）增加 cronloops 的计数值（此字段用于实现 serverCron 每执行多少次就执行一次 xxx 的功能）
+
+1-3关于服务器状态信息；5-7 是管理 client 和 db；8-10 和持久化相关
+
+#### 3.初始化过程
+1）创建 redisServer 的数据结构实例（设置 pid，以及某些必须数据均采用默认值），初始化 LRU 时钟，创建命令表（即上文提到的 redisCommand）
+2）载入配置文件，设置对应的值
+3）创建其余数据结构，比如 server.Clients 链表、server.db 数组、lua 执行环境等
+4）还原数据库状态，即从 RDB 文件或者 AOF 文件载入数据
+5）start [main loop](#事件处理)
+
 
 ## 主要参考资料
 

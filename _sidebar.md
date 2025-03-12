@@ -6,3 +6,4 @@
 - 其余
     - [Redis 设计与实现总结（进行中）](/%E5%85%B6%E4%BD%99/Redis%20%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93%EF%BC%88%E6%9C%AA%E5%AE%8C%E6%88%90%EF%BC%89.md)
     - [论 Redis 的 ACID 性质](/%E5%85%B6%E4%BD%99/%E8%AE%BA%20Redis%20%E7%9A%84%20ACID%20%E6%80%A7%E8%B4%A8.md)
+    - [二分查找变体函数解析](其余/二分查找变体函数解析.md)
